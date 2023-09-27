@@ -169,7 +169,7 @@
                     ControllerIndex,
                     (int)trigSide,
                     (int)TriggerMode.VibrateTrigger,
-                    frequency > 255 ? 255 : frequency
+                    frequency > 15 ? 15 : frequency
                 }
             };
         }
@@ -267,7 +267,7 @@
                     end < 0 ? 0 : end > 9 ? 9 : end,
                     firstFoot < 0 ? 0 : firstFoot > 6 ? 6 : firstFoot,
                     secondFoot < 0 ? 0 : secondFoot > 7 ? 7 : secondFoot,
-                    frequency < 0 ? 0 : frequency > 255 ? 255 : frequency
+                    frequency < 0 ? 0 : frequency > 15 ? 15 : frequency
                 }
             };
         }
@@ -296,10 +296,10 @@
                 parameters = new object[] {
                     ControllerIndex,
                     (int)trigSide,
-                    (int)TriggerMode.SemiAutomaticGun,
+                    (int)TriggerMode.AutomaticGun,
                     start < 0 ? 0 : start > 9 ? 9 : start,
                     strength < 0 ? 0 : strength > 8 ? 8 : strength,
-                    frequency < 0 ? 0 : frequency > 255 ? 255 : frequency
+                    frequency < 0 ? 0 : frequency > 15 ? 15 : frequency
                 }
             };
         }
@@ -312,12 +312,12 @@
                 parameters = new object[] {
                     ControllerIndex,
                     (int)trigSide,
-                    (int)TriggerMode.AutomaticGun,
+                    (int)TriggerMode.Machine,
                     start < 0 ? 0 : start > 8 ? 8 : start,
                     end < 0 ? 0 : end > 9 ? 9 : end,
                     strengthA < 0 ? 0 : strengthA > 7 ? 7 : strengthA,
                     strengthB < 0 ? 0 : strengthB > 7 ? 7 : strengthB,
-                    frequency < 0 ? 0 : frequency > 255 ? 255 : frequency,
+                    frequency < 0 ? 0 : frequency > 15 ? 15 : frequency,
                     period < 0 ? 0 : period > 2 ? 2 : period
                 }
             };
