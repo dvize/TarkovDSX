@@ -146,41 +146,123 @@ namespace DSX
                 if (isBallisticWeapon)
                 {
                     Weapon weapon = obj.Item as Weapon;
-                    string weapclass = weapon.WeapClass.ToLower();
-                    string firemode = weapon.SelectedFireMode.ToString().ToLower();
-                   
-
-                    Logger.LogDebug("Weapon.WeapClass is: " + weapclass);
-                    Logger.LogDebug("Weapon.SelectedFireMode is: " + firemode);
                     Logger.LogDebug("Weapon.firerate is: " + weapon.FireRate);
 
-                    /*switch (weapclass)
+                    switch (weapon.WeapClass.ToLower())
                     {
                         case "assaultrifle":
-                            if(firemode == "fullauto")
+                            Logger.LogDebug("TarkovDSX: Assault Rifle in hands: " + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.semiauto)
                             {
-                                Logger.LogDebug("TarkovDSX: Full Auto Assault Rifle in hands: " + weapon.LocalizedName());
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                            }
+                            else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+                            {
                                 triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
                                 rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, CalculateFrequency(weapon.FireRate));
-
                             }
-                            else if(firemode == "semiauto")
+                            break;
+                        case "assaultcarbine": // toz sks 7.62x39
+                            Logger.LogDebug("TarkovDSX: Assault Carbine in hands: " + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.semiauto)
                             {
-                                Logger.LogDebug("TarkovDSX: Semi Auto Assault Rifle in hands: " + weapon.LocalizedName());
-                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 130);
+
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                            }
+                            else
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, CalculateFrequency(weapon.FireRate));
+                            }
+                            break;
+                        case "marksmanrifle": //RSASS, mk-18, SR-25, HK G28
+                            Logger.LogDebug("TarkovDSX: Marksman Rifle in hands:" + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.semiauto)
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                            }
+                            else
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, CalculateFrequency(weapon.FireRate));
+                            }
+                            break;
+                        case "sniperrifle": // mosins , DVL-10, basically any bolt-action
+                            Logger.LogDebug("TarkovDSX: Sniper Rifle in hands: " + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.VeryHard(Trigger.Right);
+                            }
+                            else if (weapon.SelectedFireMode == Weapon.EFireMode.semiauto)
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.VeryHard(Trigger.Right);
+                            }
+                            break;
+                        case "smg":
+                            Logger.LogDebug("TarkovDSX: SMG in hands: " + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                            }
+                            else
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, CalculateFrequency(weapon.FireRate));
+                            }
+                            break;
+                        case "shotgun":
+                            Logger.LogDebug("TarkovDSX: Shotgun in hands: " + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
                                 rightTriggerUpdate = Instruction.Hard(Trigger.Right);
                             }
                             break;
-                    }*/
-
-                    if (firemode == "fullauto")
-                    {
-                        Logger.LogDebug("TarkovDSX: Full Auto Assault Rifle in hands: " + weapon.LocalizedName());
-
-                        //triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                        var frequency = CalculateFrequency(weapon.FireRate);
-                        Logger.LogDebug("TarkovDSX: Frequency is: " + frequency);
-                        rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 6, 8, frequency);
+                        case "pistol":
+                            Logger.LogDebug("TarkovDSX: Pistol in hands: " + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                            }
+                            else
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, CalculateFrequency(weapon.FireRate));
+                            }
+                            break;
+                        case "grenadelauncher":
+                            Logger.LogDebug("TarkovDSX: Grenade Launcher in hands: " + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.Rigid(Trigger.Right);
+                            }
+                            break;
+                        case "machinegun":
+                            Logger.LogDebug("TarkovDSX: Machine Gun in hands: " + weapon.LocalizedName());
+                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                            }
+                            else
+                            {
+                                triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                                rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, CalculateFrequency(weapon.FireRate));
+                            }
+                            break;
+                        default:
+                            Logger.LogDebug("TarkovDSX: Unknown Weapon in hands: " + weapon.LocalizedName());
+                            triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 0);
+                            rightTriggerUpdate = Instruction.Normal(Trigger.Right);
+                            break;
                     }
 
                     triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 150);
