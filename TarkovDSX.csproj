@@ -113,8 +113,12 @@
     <Compile Include="DSX\Trigger.cs" />
     <Compile Include="DSX\TriggerMode.cs" />
     <Compile Include="DSX\Triggers.cs" />
+    <Compile Include="Patches.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

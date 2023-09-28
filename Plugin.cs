@@ -28,6 +28,7 @@ namespace DSX
                 "Sets how much trigger needs to be pressed before it triggers");
 
             new NewGamePatch().Enable();
+            new ChangeFireModePatch().Enable();
         }
 
     }
