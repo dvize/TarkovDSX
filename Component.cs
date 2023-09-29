@@ -39,7 +39,7 @@ namespace DSX
         private Packet otherControllerInstructions = new Packet();
 
         private float lastSendTime;
-        private float sendInterval = 0.05f;
+        private float sendInterval = 0.05f;  //limit for how often to send udp packets
 
         public static ManualLogSource Logger
         {

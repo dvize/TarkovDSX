@@ -60,7 +60,7 @@ namespace DSX
                     DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
                 }
 
-                Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Reset to firemode");
+                Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Reset Trigger as Ammo Added to Chamber");
                 DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
                 DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
                 
@@ -87,7 +87,7 @@ namespace DSX
                 //need check if mag is empty as well
                 if (weapon.GetCurrentMagazineCount() == 0)
                 {
-                    Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Reset to firemode");
+                    Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Out of Ammo Trigger Setting");
                     DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
                     DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
                 }
