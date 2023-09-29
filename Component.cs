@@ -1,13 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
-using System.Timers;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
 using EFT.InventoryLogic;
+using HarmonyLib;
+using Tomlyn;
+using Tomlyn.Model;
+using Tomlyn.Syntax;
 using UnityEngine;
+
+//pragma 
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable IDE0007 // Use implicit type
 
 namespace DSX
 {
@@ -15,7 +22,7 @@ namespace DSX
     {
         private static GameWorld gameWorld;
         private static DualSenseConnection dualSenseConnection;
-        private static Player player;
+        internal static Player player;
         private const int maxFireRate = 1000;      // 1000 rounds per minute
         private const int ControllerIndex = 0;
 
@@ -64,7 +71,28 @@ namespace DSX
             StartDSXConnection();
             SetupInitialControls();
             AttachEvents();
+            LoadTomlConfig();
         }
+
+        private void LoadTomlConfig()
+        {
+            // Load and parse the TOML file
+            DocumentSyntax toml = Toml.Parse(File.ReadAllText("dvize.DSX.config.toml"));
+
+            //create toml table from the parsed toml file
+            TomlTable config = toml.ToModel() as TomlTable;
+
+            if (config != null)
+            {
+                TomlTable assaultrifle = (TomlTable)config["assaultrifle"];
+                TomlTable fullauto = (TomlTable)assaultrifle["fullauto"];
+
+                double frequency = (double)fullauto["frequency"];
+
+            }
+
+        }
+
         private void StartDSXConnection()
         {
             Logger.LogDebug("TarkovDSX: Starting DSX Connection");
@@ -96,14 +124,14 @@ namespace DSX
 
         private void AttachEvents()
         {
-            // need to check weapon in hand, on firemode switch, if aim down sights, if grenade pin pulled, on damage received flash colors?
-            // also what do i need to attach to use controller gyro for lean or blindfire shooting
             // if laying down do lean left and right with controller tilt
             // if weapon jammed, shake controller to clear?
-           
-            player.OnDamageReceived += Player_OnDamageReceived;
-            player.HandsChangedEvent += Player_HandsChangedEvent;
+            // if weapon empty, set trigger to light empty click
+
+            player.OnDamageReceived += Player_OnDamageReceived;             //use this for the damage LED indicator on controller
+            player.HandsChangedEvent += Player_HandsChangedEvent;           //use this to detect when weapon has changed to see the type and firemode
         }
+
         private void Update()
         {
             if (dualSenseConnection != null)
@@ -131,9 +159,9 @@ namespace DSX
             //check to see the weapon type if its a gun or grenade or melee
             if (player.IsWeaponOrKnifeInHands)
             {
-                bool isBallisticWeapon = false; 
+                bool isBallisticWeapon;
 
-                if(obj.Item is KnifeClass)
+                if (obj.Item is KnifeClass)
                 {
                     isBallisticWeapon = false;
                 }
@@ -142,164 +170,29 @@ namespace DSX
                     Logger.LogDebug("TarkovDSX: Shooting Weapon in hands");
                     isBallisticWeapon = true;
                 }
-                
+
                 if (isBallisticWeapon)
                 {
                     Weapon weapon = obj.Item as Weapon;
                     Logger.LogDebug("Weapon.firerate is: " + weapon.FireRate);
 
-                    switch (weapon.WeapClass.ToLower())
-                    {
-                        case "assaultrifle":
-                            Logger.LogDebug("TarkovDSX: Assault Rifle in hands: " + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.burst)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            break;
-                        case "assaultcarbine": // toz sks 7.62x39
-                            Logger.LogDebug("TarkovDSX: Assault Carbine in hands: " + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.burst)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            break;
-                        case "marksmanrifle": //RSASS, mk-18, SR-25, HK G28
-                            Logger.LogDebug("TarkovDSX: Marksman Rifle in hands:" + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.burst)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            break;
-                        case "sniperrifle": // mosins , DVL-10, basically any bolt-action
-                            Logger.LogDebug("TarkovDSX: Sniper Rifle in hands: " + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.VeryHard(Trigger.Right);
-                            }
-                            break;
-                        case "smg":
-                            Logger.LogDebug("TarkovDSX: SMG in hands: " + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.burst)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            break;
-                        case "shotgun":
-                            Logger.LogDebug("TarkovDSX: Shotgun in hands: " + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
-                            }
-                            else if (weapon.SelectedFireMode == Weapon.EFireMode.doubleaction)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
-                            }
-                            break;
-                        case "pistol":
-                            Logger.LogDebug("TarkovDSX: Pistol in hands: " + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
-                            }
-                            else
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            break;
-                        case "grenadelauncher":
-                            Logger.LogDebug("TarkovDSX: Grenade Launcher in hands: " + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Rigid(Trigger.Right);
-                            }
-                            break;
-                        case "machinegun":
-                            Logger.LogDebug("TarkovDSX: Machine Gun in hands: " + weapon.LocalizedName());
-                            if (weapon.SelectedFireMode == Weapon.EFireMode.single)
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
-                            }
-                            else
-                            {
-                                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
-                                DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
-                            }
-                            break;
-                        default:
-                            Logger.LogDebug("TarkovDSX: Unknown Weapon in hands: " + weapon.LocalizedName());
-                            DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 0);
-                            DSXComponent.rightTriggerUpdate = Instruction.Normal(Trigger.Right);
-                            break;
-                    }
+                    changeTriggerFromWeaponType(weapon);
 
                     triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 150);
                     leftTriggerUpdate = Instruction.GameCube(Trigger.Left);
-                    
+
                 }
                 else if (!isBallisticWeapon)
                 {
                     KnifeClass weapon = obj.Item as KnifeClass;
 
-                    if(weapon.Weight < 0.3)
+                    if (weapon.Weight <= 0.3)
                     {
                         Logger.LogDebug("TarkovDSX: Melee Weapon in hands: " + weapon.LocalizedName());
-                        
+
                         rightTriggerUpdate = Instruction.Resistance(Trigger.Right, 0, 3);
                     }
-                    else if (weapon.Weight < 1)
+                    else if (weapon.Weight <= 1)
                     {
                         Logger.LogDebug("TarkovDSX: Melee Weapon in hands: " + weapon.LocalizedName());
                         rightTriggerUpdate = Instruction.Resistance(Trigger.Right, 0, 6);
@@ -311,9 +204,290 @@ namespace DSX
                     }
                     leftTriggerUpdate = Instruction.Normal(Trigger.Left);
                 }
-                
+
             }
         }
+
+        internal static void changeTriggerFromWeaponType(Weapon weapon)
+        {
+            switch (weapon.WeapClass.ToLower())
+            {
+                case "assaultrifle":
+                    Logger.LogDebug("TarkovDSX: Assault Rifle in hands: " + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.burst)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "assaultcarbine": // toz sks 7.62x39
+                    Logger.LogDebug("TarkovDSX: Assault Carbine in hands: " + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.burst)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "marksmanrifle": //RSASS, mk-18, SR-25, HK G28
+                    Logger.LogDebug("TarkovDSX: Marksman Rifle in hands:" + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.burst)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "sniperrifle": // mosins , DVL-10, basically any bolt-action
+                    Logger.LogDebug("TarkovDSX: Sniper Rifle in hands: " + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.VeryHard(Trigger.Right);
+                    }
+                    break;
+                case "smg":
+                    Logger.LogDebug("TarkovDSX: SMG in hands: " + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.burst)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "shotgun":
+                    Logger.LogDebug("TarkovDSX: Shotgun in hands: " + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (weapon.SelectedFireMode == Weapon.EFireMode.doubleaction)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    break;
+                case "pistol":
+                    Logger.LogDebug("TarkovDSX: Pistol in hands: " + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "grenadelauncher":
+                    Logger.LogDebug("TarkovDSX: Grenade Launcher in hands: " + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Rigid(Trigger.Right);
+                    }
+                    break;
+                case "machinegun":
+                    Logger.LogDebug("TarkovDSX: Machine Gun in hands: " + weapon.LocalizedName());
+                    if (weapon.SelectedFireMode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                default:
+                    Logger.LogDebug("TarkovDSX: Unknown Weapon in hands: " + weapon.LocalizedName());
+                    DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 0);
+                    DSXComponent.rightTriggerUpdate = Instruction.Normal(Trigger.Right);
+                    break;
+            }
+        }
+
+        internal static void changeTriggerFromWeaponType(Weapon weapon, Weapon.EFireMode firemode)
+        {
+            switch (weapon.WeapClass.ToLower())
+            {
+                case "assaultrifle":
+                    Logger.LogDebug("TarkovDSX: Assault Rifle in hands: " + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (firemode == Weapon.EFireMode.fullauto)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    else if (firemode == Weapon.EFireMode.burst)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "assaultcarbine": // toz sks 7.62x39
+                    Logger.LogDebug("TarkovDSX: Assault Carbine in hands: " + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (firemode == Weapon.EFireMode.fullauto)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    else if (firemode == Weapon.EFireMode.burst)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "marksmanrifle": //RSASS, mk-18, SR-25, HK G28
+                    Logger.LogDebug("TarkovDSX: Marksman Rifle in hands:" + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (firemode == Weapon.EFireMode.fullauto)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    else if (firemode == Weapon.EFireMode.burst)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "sniperrifle": // mosins , DVL-10, basically any bolt-action
+                    Logger.LogDebug("TarkovDSX: Sniper Rifle in hands: " + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.VeryHard(Trigger.Right);
+                    }
+                    break;
+                case "smg":
+                    Logger.LogDebug("TarkovDSX: SMG in hands: " + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (firemode == Weapon.EFireMode.fullauto)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    else if (firemode == Weapon.EFireMode.burst)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "shotgun":
+                    Logger.LogDebug("TarkovDSX: Shotgun in hands: " + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else if (firemode == Weapon.EFireMode.doubleaction)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    break;
+                case "pistol":
+                    Logger.LogDebug("TarkovDSX: Pistol in hands: " + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                case "grenadelauncher":
+                    Logger.LogDebug("TarkovDSX: Grenade Launcher in hands: " + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Rigid(Trigger.Right);
+                    }
+                    break;
+                case "machinegun":
+                    Logger.LogDebug("TarkovDSX: Machine Gun in hands: " + weapon.LocalizedName());
+                    if (firemode == Weapon.EFireMode.single)
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.Hard(Trigger.Right);
+                    }
+                    else
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 80);
+                        DSXComponent.rightTriggerUpdate = Instruction.AutomaticGun(Trigger.Right, 0, 8, DSXComponent.CalculateFrequency(weapon.FireRate));
+                    }
+                    break;
+                default:
+                    Logger.LogDebug("TarkovDSX: Unknown Weapon in hands: " + weapon.LocalizedName());
+                    DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 0);
+                    DSXComponent.rightTriggerUpdate = Instruction.Normal(Trigger.Right);
+                    break;
+            }
+        }
+
         private async void Player_OnDamageReceived(float damage, EBodyPart part, EDamageType type, float absorbed, MaterialType special)
         {
             Logger.LogDebug("TarkovDSX: Damage Received");
@@ -338,11 +512,11 @@ namespace DSX
             //doesn't seem like a full auto fire above 15 frequency
             return (int)((15.0 / maxFireRate) * fireRate);
         }
-        
 
-        
 
-        
+
+
+
 
 
 

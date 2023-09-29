@@ -1,0 +1,95 @@
+[assaultrifle.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Hard"
+
+[assaultrifle.fullauto]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
+[assaultrifle.burst]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
+[assaultcarbine.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Hard"
+
+[assaultcarbine.fullauto]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
+[marksmanrifle.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Hard"
+
+[marksmanrifle.fullauto]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
+[marksmanrifle.burst]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
+
+[sniperrifle.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "VeryHard"
+
+[smg.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Hard"
+
+[smg.fullauto]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
+[smg.burst]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
+[shotgun.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Hard"
+
+[shotgun.doubleaction]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Hard"
+
+[pistol.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Hard"
+
+[pistol.fullauto]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
+[grenadelauncher.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Rigid"
+
+[machinegun.single]
+triggerThresholdRight = 80
+rightTriggerUpdate = "Hard"
+
+[machinegun.fullauto]
+triggerThresholdRight = 80
+rightTriggerUpdate = "AutomaticGun"
+minValue = 0
+maxValue = 8
+
