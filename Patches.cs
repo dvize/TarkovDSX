@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using Aki.Reflection.Patching;
 using EFT;
 using EFT.InventoryLogic;
@@ -53,17 +48,16 @@ namespace DSX
                 var weapon = __instance.Item;
 
                 //check if malfunction
-                if(weapon.MalfState.State != Weapon.EMalfunctionState.None)
+                if (weapon.MalfState.State != Weapon.EMalfunctionState.None)
                 {
                     Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Malfunction still there");
                     DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
                     DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
                 }
 
-                Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Reset Trigger as Ammo Added to Chamber");
-                DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
-                DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
-                
+                //Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Reset Trigger as Ammo Added to Chamber");
+                DSXComponent.changeTriggerFromWeaponType(weapon);
+
             }
 
         }
@@ -81,7 +75,7 @@ namespace DSX
         {
             if (____player.IsYourPlayer)
             {
-                Logger.LogDebug("TarkovDSX: FirearmController RemoveAmmoFromChamber");
+               // Logger.LogDebug("TarkovDSX: FirearmController RemoveAmmoFromChamber");
                 var weapon = __instance.Item;
 
                 //need check if mag is empty as well

@@ -196,8 +196,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "F:\SPT-AKI-DEV\BepInEx\plugins\$(TargetName).dll"
-copy "$(TargetDir)dvize.DSX.config.toml" "F:\SPT-AKI-DEV\BepInEx\plugins\dvize.DSX.config.toml"
+    <PostBuildEvent>copy "$(TargetPath)" "F:\SPT-AKI-DEV\BepInEx\plugins\dvize.DSX\$(TargetName).dll"
+copy "$(TargetDir)dvize.DSX.config.toml" "F:\SPT-AKI-DEV\BepInEx\plugins\dvize.DSX\dvize.DSX.config.toml"
 if $(ConfigurationName) == Debug (
     copy "$(TargetDir)$(TargetName).pdb" "F:\SPT-AKI-DEV\BepInEx\plugins\$(TargetName).pdb"
 ) else (

@@ -77,7 +77,12 @@ namespace DSX
         private void LoadTomlConfig()
         {
             // Load and parse the TOML file
-            DocumentSyntax toml = Toml.Parse(File.ReadAllText("dvize.DSX.config.toml"));
+
+            string bepinexPluginFolder = BepInEx.Paths.PluginPath;
+            Logger.LogError("bep plugin path: " + bepinexPluginFolder);
+            string filePath = Path.Combine(bepinexPluginFolder, "dvize.DSX", "dvize.DSX.config.toml");
+
+            DocumentSyntax toml = Toml.Parse(File.ReadAllText(filePath));
 
             //create toml table from the parsed toml file
             TomlTable config = toml.ToModel() as TomlTable;
