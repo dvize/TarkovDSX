@@ -175,7 +175,7 @@ namespace DSX
                 if (isBallisticWeapon)
                 {
                     Weapon weapon = obj.Item as Weapon;
-                    Logger.LogDebug("Weapon.firerate is: " + weapon.FireRate);
+                    //Logger.LogDebug("Weapon.firerate is: " + weapon.FireRate);
 
                     changeTriggerFromWeaponType(weapon);
 
@@ -207,7 +207,7 @@ namespace DSX
                 else if (!isBallisticWeapon)
                 {
                     KnifeClass weapon = obj.Item as KnifeClass;
-                    Logger.LogDebug("TarkovDSX: Melee Weapon in hands: " + weapon.LocalizedName());
+                    //Logger.LogDebug("TarkovDSX: Melee Weapon in hands: " + weapon.LocalizedName());
                     if (weapon.Weight <= 0.4)
                     {
                         leftTriggerUpdate = Instruction.Resistance(Trigger.Left, 0, 3);
@@ -231,7 +231,7 @@ namespace DSX
         //use this method when switching weapons.
         internal static void changeTriggerFromWeaponType(Weapon weapon)
         {
-            Logger.LogDebug("TarkovDSX: " + weapon.LocalizedName());
+            //Logger.LogDebug("TarkovDSX: " + weapon.LocalizedName());
 
             var side = readConfigTriggerSide(weapon);
 
@@ -297,7 +297,7 @@ namespace DSX
 
         private async void Player_OnDamageReceived(float damage, EBodyPart part, EDamageType type, float absorbed, MaterialType special)
         {
-            Logger.LogDebug("TarkovDSX: Damage Received");
+            //Logger.LogDebug("TarkovDSX: Damage Received");
             //flashing hit indicator
 
             // Create the first RGB update
