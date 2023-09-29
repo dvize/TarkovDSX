@@ -1,4 +1,6 @@
-[
+{
+	"weapons":
+	[
         {
             "name": "assaultrifle",
             "fireModes": [
@@ -153,7 +155,7 @@
                     "instructionType": "Hard"
                 },
                 {
-                    "mode": "other",
+                    "mode": "fullauto",
                     "threshold": 80,
                     "trigger": "Right",
                     "instructionType": "AutomaticGun",
@@ -184,7 +186,7 @@
                     "instructionType": "Hard"
                 },
                 {
-                    "mode": "other",
+                    "mode": "fullauto",
                     "threshold": 80,
                     "trigger": "Right",
                     "instructionType": "AutomaticGun",
@@ -194,5 +196,31 @@
                 }
             ]
         }
-]
-
+	],
+	"other": 
+	[
+		{
+            "name": "scope",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Left",
+                    "instructionType": "gamecube"
+                },
+                {
+                    "mode": "burst",
+                    "threshold": 80,
+                    "trigger": "Left",
+                    "instructionType": "gamecube"
+                },
+				{
+                    "mode": "fullauto",
+                    "threshold": 80,
+                    "trigger": "Left",
+                    "instructionType": "gamecube"
+                }
+            ]
+        }
+	]
+}

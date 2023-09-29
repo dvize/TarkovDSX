@@ -51,8 +51,19 @@ namespace DSX
                 if (weapon.MalfState.State != Weapon.EMalfunctionState.None)
                 {
                     Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Malfunction still there");
-                    DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
-                    DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
+
+                    var side = DSXComponent.readConfigTriggerSide(weapon);
+
+                    if (side == Trigger.Left)
+                    {
+                        DSXComponent.triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
+                        DSXComponent.leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
+                    }
+                    else
+                    {
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
+                        DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
+                    }
                 }
 
                 //Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Reset Trigger as Ammo Added to Chamber");
