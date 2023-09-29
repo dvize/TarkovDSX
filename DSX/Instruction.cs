@@ -304,7 +304,7 @@
             };
         }
 
-        public static Instruction Machine(Trigger trigSide, int start, int end, int strengthA, int strengthB, int frequency, int period)
+        public static Instruction Machine(Trigger trigSide, int start, int end, int strengthA, int strengthB, int frequency, float period)
         {
             return new Instruction
             {

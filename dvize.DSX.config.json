@@ -1,0 +1,198 @@
+[
+        {
+            "name": "assaultrifle",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                },
+                {
+                    "mode": "fullauto",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                },
+                {
+                    "mode": "burst",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                }
+            ]
+        },
+        {
+            "name": "assaultcarbine",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                },
+                {
+                    "mode": "fullauto",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                },
+                {
+                    "mode": "burst",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                }
+            ]
+        },
+        {
+            "name": "marksmanrifle",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                },
+                {
+                    "mode": "fullauto",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                },
+                {
+                    "mode": "burst",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                }
+            ]
+        },
+        {
+            "name": "sniperrifle",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "VeryHard"
+                }
+            ]
+        },
+        {
+            "name": "smg",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                },
+                {
+                    "mode": "fullauto",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                },
+                {
+                    "mode": "burst",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                }
+            ]
+        },
+        {
+            "name": "shotgun",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                },
+                {
+                    "mode": "doubleaction",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                }
+            ]
+        },
+        {
+            "name": "pistol",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                },
+                {
+                    "mode": "other",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                }
+            ]
+        },
+        {
+            "name": "grenadelauncher",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Rigid"
+                }
+            ]
+        },
+        {
+            "name": "machinegun",
+            "fireModes": [
+                {
+                    "mode": "single",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                },
+                {
+                    "mode": "other",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "AutomaticGun",
+                    "start": 0,
+                    "strength": 8,
+                    "frequency": 10
+                }
+            ]
+        }
+]
+
