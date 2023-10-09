@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
-using AmandsController;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
 using EFT.InventoryLogic;
-using HarmonyLib;
 using Newtonsoft.Json;
-using SharpDX.XInput;
 using UnityEngine;
 
 //pragma 
@@ -184,25 +180,8 @@ namespace DSX
                     Logger.LogDebug("Weapon.firerate is: " + weapon.FireRate);
                     Logger.LogDebug("TarkovDSX: Weapon FireMode is " + weapon.SelectedFireMode.ToString().ToLower());
 
-                    if (weapon.ChamberAmmoCount == 0 && weapon.GetCurrentMagazineCount() == 0)
-                    {
-                        Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Out of Ammo Trigger Setting");
-                        var side = readConfigTriggerSide(weapon);
-
-                        if (side == Trigger.Left)
-                        {
-                            triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
-                            leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
-                        }
-                        else
-                        {
-                            triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
-                            rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
-                        }
-
-                        return;
-                    }
-
+                    checkEmptyChamber(weapon);
+                    checkMalfunction(weapon);
                     changeTriggerFromWeaponType(weapon);
 
                     //set aim in with scope for whatever side trigger is set in config.other
@@ -253,6 +232,7 @@ namespace DSX
 
             }
         }
+
         private async void Player_OnDamageReceived(float damage, EBodyPart part, EDamageType type, float absorbed, MaterialType special)
         {
             //Logger.LogDebug("TarkovDSX: Damage Received");
@@ -271,6 +251,53 @@ namespace DSX
             tempupdate.instructions[0] = Instruction.RGBUpdate(0, 0, 0);
             dualSenseConnection.Send(tempupdate);
         }
+
+        internal static void checkMalfunction(Weapon weapon)
+        {
+            //check if malfunction
+            if (weapon.MalfState.State != Weapon.EMalfunctionState.None)
+            {
+                Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Malfunction still there");
+
+                var side = DSXComponent.readConfigTriggerSide(weapon);
+
+                if (side == Trigger.Left)
+                {
+                    DSXComponent.triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
+                    DSXComponent.leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
+                }
+                else
+                {
+                    DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
+                    DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
+                }
+
+                return;
+            }
+        }
+
+        internal static void checkEmptyChamber(Weapon weapon)
+        {
+            if (weapon.ChamberAmmoCount == 0 && weapon.GetCurrentMagazineCount() == 0)
+            {
+                Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Out of Ammo Trigger Setting");
+                var side = readConfigTriggerSide(weapon);
+
+                if (side == Trigger.Left)
+                {
+                    triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
+                    leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
+                }
+                else
+                {
+                    triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
+                    rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
+                }
+
+                return;
+            }
+        }
+
 
         #region ToolMethods
         //use this method when switching weapons.
@@ -334,7 +361,7 @@ namespace DSX
                     break;
                 }
             }
-            
+
             Logger.LogDebug("TarkovDSX: (ReadConfigTriggerSide) Could not find weapon/firemode in config, defaulting to right trigger");
             Logger.LogDebug("TarkovDSX: The weapon is: " + weapon.WeapClass.ToLower() + " and the firemode is: " + weapon.SelectedFireMode.ToString().ToLower());
             return Trigger.Right;
