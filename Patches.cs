@@ -64,11 +64,13 @@ namespace DSX
                         DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
                         DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
                     }
+
+                    return;
                 }
 
                 //Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Reset Trigger as Ammo Added to Chamber");
                 DSXComponent.changeTriggerFromWeaponType(weapon);
-
+                return;
             }
 
         }
@@ -86,19 +88,36 @@ namespace DSX
         {
             if (____player.IsYourPlayer)
             {
-               // Logger.LogDebug("TarkovDSX: FirearmController RemoveAmmoFromChamber");
+                // Logger.LogDebug("TarkovDSX: FirearmController RemoveAmmoFromChamber");
                 var weapon = __instance.Item;
+                
 
-                //need check if mag is empty as well
-                if (weapon.GetCurrentMagazineCount() == 0)
+                //if the weapon chamber is shooting off current round and magazine is empty then set to verysoft triggers
+                if (weapon.ChamberAmmoCount == 1 && weapon.GetCurrentMagazineCount() == 0)
                 {
-                    Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Out of Ammo Trigger Setting");
-                    DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
-                    DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
+                    Logger.LogDebug("TarkovDSX: FirearmController RemoveAmmoFromChamber: Weapon Empty");
+                    var side = DSXComponent.readConfigTriggerSide(weapon);
+
+                    if (side == Trigger.Left)
+                    {
+                        DSXComponent.triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
+                        DSXComponent.leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
+                    }
+                    else
+                    {
+
+                        DSXComponent.triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
+                        DSXComponent.rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
+                    }
+
+                    return;
                 }
+
+                //we don't need to do anything then because they still shooting.
 
             }
 
         }
     }
+
 }

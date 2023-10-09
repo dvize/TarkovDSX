@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
+using AmandsController;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
 using EFT.InventoryLogic;
+using HarmonyLib;
 using Newtonsoft.Json;
+using SharpDX.XInput;
 using UnityEngine;
 
 //pragma 
@@ -73,6 +77,7 @@ namespace DSX
             SetupInitialControls();
             AttachEvents();
             LoadJsonConfig();
+            Logger.LogInfo("TarkovDSX: Loaded all start events with no issue");
         }
 
         private void LoadJsonConfig()
@@ -123,16 +128,6 @@ namespace DSX
 
             config = new ConfigFile();
         }
-
-        private void AttachEvents()
-        {
-            // if laying down do lean left and right with controller tilt
-            // if weapon jammed, shake controller to clear?
-
-            player.OnDamageReceived += Player_OnDamageReceived;             //use this for the damage LED indicator on controller
-            player.HandsChangedEvent += Player_HandsChangedEvent;           //use this to detect when weapon has changed to see the type and firemode
-        }
-
         private void Update()
         {
             if (dualSenseConnection != null)
@@ -154,9 +149,20 @@ namespace DSX
             }
 
         }
+        private void AttachEvents()
+        {
+            // if laying down do lean left and right with controller tilt
+            // if weapon jammed, shake controller to clear?
+
+            player.OnDamageReceived += Player_OnDamageReceived;             //use this for the damage LED indicator on controller
+            player.HandsChangedEvent += Player_HandsChangedEvent;           //use this to detect when weapon has changed to see the type and firemode
+
+        }
+
         private void Player_HandsChangedEvent(GInterface109 obj)
         {
             //Logger.LogDebug("TarkovDSX: Hands Changed");
+
             //check to see the weapon type if its a gun or grenade or melee
             if (player.IsWeaponOrKnifeInHands)
             {
@@ -175,7 +181,27 @@ namespace DSX
                 if (isBallisticWeapon)
                 {
                     Weapon weapon = obj.Item as Weapon;
-                    //Logger.LogDebug("Weapon.firerate is: " + weapon.FireRate);
+                    Logger.LogDebug("Weapon.firerate is: " + weapon.FireRate);
+                    Logger.LogDebug("TarkovDSX: Weapon FireMode is " + weapon.SelectedFireMode.ToString().ToLower());
+
+                    if (weapon.ChamberAmmoCount == 0 && weapon.GetCurrentMagazineCount() == 0)
+                    {
+                        Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Out of Ammo Trigger Setting");
+                        var side = readConfigTriggerSide(weapon);
+
+                        if (side == Trigger.Left)
+                        {
+                            triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
+                            leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
+                        }
+                        else
+                        {
+                            triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
+                            rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
+                        }
+
+                        return;
+                    }
 
                     changeTriggerFromWeaponType(weapon);
 
@@ -227,7 +253,26 @@ namespace DSX
 
             }
         }
+        private async void Player_OnDamageReceived(float damage, EBodyPart part, EDamageType type, float absorbed, MaterialType special)
+        {
+            //Logger.LogDebug("TarkovDSX: Damage Received");
+            //flashing hit indicator
 
+            // Create the first RGB update
+            Packet tempupdate = new Packet();
+            tempupdate.instructions = new Instruction[] { Instruction.RGBUpdate(255, 0, 0) };
+
+            dualSenseConnection.Send(tempupdate);
+
+            // Wait for a short duration
+            await Task.Delay(20);
+
+            // Create the second RGB update
+            tempupdate.instructions[0] = Instruction.RGBUpdate(0, 0, 0);
+            dualSenseConnection.Send(tempupdate);
+        }
+
+        #region ToolMethods
         //use this method when switching weapons.
         internal static void changeTriggerFromWeaponType(Weapon weapon)
         {
@@ -280,7 +325,7 @@ namespace DSX
                             {
                                 return Trigger.Left;
                             }
-                            else
+                            else if (fireMode.trigger.ToLower() == "right")
                             {
                                 return Trigger.Right;
                             }
@@ -289,31 +334,11 @@ namespace DSX
                     break;
                 }
             }
-
+            
             Logger.LogDebug("TarkovDSX: (ReadConfigTriggerSide) Could not find weapon/firemode in config, defaulting to right trigger");
+            Logger.LogDebug("TarkovDSX: The weapon is: " + weapon.WeapClass.ToLower() + " and the firemode is: " + weapon.SelectedFireMode.ToString().ToLower());
             return Trigger.Right;
         }
-
-
-        private async void Player_OnDamageReceived(float damage, EBodyPart part, EDamageType type, float absorbed, MaterialType special)
-        {
-            //Logger.LogDebug("TarkovDSX: Damage Received");
-            //flashing hit indicator
-
-            // Create the first RGB update
-            Packet tempupdate = new Packet();
-            tempupdate.instructions = new Instruction[] { Instruction.RGBUpdate(255, 0, 0) };
-
-            dualSenseConnection.Send(tempupdate);
-
-            // Wait for a short duration
-            await Task.Delay(20);
-
-            // Create the second RGB update
-            tempupdate.instructions[0] = Instruction.RGBUpdate(0, 0, 0);
-            dualSenseConnection.Send(tempupdate);
-        }
-
         internal static int CalculateFrequency(int fireRate)
         {
             //doesn't seem like a full auto fire above 15 frequency
@@ -603,6 +628,10 @@ namespace DSX
 
             return Instruction.TriggerThreshold(Trigger.Invalid, 0);
         }
+
+        #endregion
+
+        #region JsonFileDeserializedClasses
         public class FireModeConfig
         {
             public string mode;
@@ -644,6 +673,7 @@ namespace DSX
             public List<WeaponConfig> weapons;
             public List<ScopeConfig> other;
         }
+        #endregion
 
     }
 }

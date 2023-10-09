@@ -91,12 +91,21 @@
         {
             "name": "sniperrifle",
             "fireModes": [
-                {
-                    "mode": "single",
-                    "threshold": 80,
-                    "trigger": "Right",
-                    "instructionType": "VeryHard"
-                }
+              {
+                "mode": "single",
+                "threshold": 80,
+                "trigger": "Right",
+                "instructionType": "VeryHard"
+              },
+              {
+                "mode": "fullauto",
+                "threshold": 80,
+                "trigger": "Right",
+                "instructionType": "AutomaticGun",
+                "start": 0,
+                "strength": 8,
+                "frequency": 10
+              }
             ]
         },
         {
@@ -139,6 +148,12 @@
                 },
                 {
                     "mode": "doubleaction",
+                    "threshold": 80,
+                    "trigger": "Right",
+                    "instructionType": "Hard"
+                },
+				{
+                    "mode": "doublet",
                     "threshold": 80,
                     "trigger": "Right",
                     "instructionType": "Hard"
@@ -214,7 +229,7 @@
                     "trigger": "Left",
                     "instructionType": "gamecube"
                 },
-				{
+				        {
                     "mode": "fullauto",
                     "threshold": 80,
                     "trigger": "Left",
