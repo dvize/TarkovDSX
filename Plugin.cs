@@ -6,8 +6,7 @@ using EFT;
 
 namespace DSX
 {
-    [BepInPlugin("com.dvize.TarkovDSX", "dvize.TarkovDSX", "1.0.0")]
-    //[BepInDependency("com.spt-aki.core", "3.7.0")]
+    [BepInPlugin("com.dvize.TarkovDSX", "dvize.TarkovDSX", "1.0.1")]
     [BepInDependency("com.Amanda.Controller")]
     public class DSXPlugin : BaseUnityPlugin
     {

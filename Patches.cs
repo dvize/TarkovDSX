@@ -72,11 +72,8 @@ namespace DSX
                 // Logger.LogDebug("TarkovDSX: FirearmController RemoveAmmoFromChamber");
                 var weapon = __instance.Item;
 
-
                 DSXComponent.checkMalfunction(weapon);
-
-                //we don't need to do anything then because they still shooting.
-
+                DSXComponent.checkEmptyChamber(weapon);
             }
 
         }

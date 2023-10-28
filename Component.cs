@@ -25,7 +25,7 @@ namespace DSX
         private const int maxFireRate = 1000;      // 1000 rounds per minute
         private const int ControllerIndex = 0;
         private float lastSendTime;
-        private float sendInterval = 0.05f;  //limit for how often to send udp packets
+        private float sendInterval = 0.03f;  //limit for how often to send udp packets
 
         internal static Instruction leftTriggerUpdate = new Instruction();
         internal static Instruction rightTriggerUpdate = new Instruction();
@@ -278,24 +278,51 @@ namespace DSX
 
         internal static void checkEmptyChamber(Weapon weapon)
         {
-            if (weapon.ChamberAmmoCount == 0 && weapon.GetCurrentMagazineCount() == 0)
+            //if weapon with magazine
+            if (weapon.GetMagazineSlot() != null)
             {
-                Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Out of Ammo Trigger Setting");
+                //if weapon with magazine and no ammo in chamber
+                if (weapon.ChamberAmmoCount == 0 && weapon.GetCurrentMagazineCount() == 0)
+                {
+                    Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Empty Chamber Trigger Setting");
+                    var side = readConfigTriggerSide(weapon);
+
+                    if (side == Trigger.Left)
+                    {
+                        triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
+                        leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
+                    }
+                    else
+                    {
+                        triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
+                        rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
+                    }
+
+                    return;
+                }
+            }
+            //if weapon doesn't have magazine, how much is loaded still
+            else if (weapon.ChamberAmmoCount == 0)
+            {
+                Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Empty Chamber Trigger Setting");
                 var side = readConfigTriggerSide(weapon);
 
                 if (side == Trigger.Left)
                 {
+
                     triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
                     leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
                 }
                 else
                 {
+
                     triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
                     rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
                 }
 
                 return;
             }
+
         }
 
 
