@@ -4,6 +4,8 @@ using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
 
+
+
 namespace DSX
 {
 
@@ -11,7 +13,7 @@ namespace DSX
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player.FirearmController.GClass1496), "ChangeFireMode");
+            return AccessTools.Method(typeof(Player.FirearmController.GClass1608), nameof(Player.FirearmController.GClass1608.ChangeFireMode));
         }
 
         [PatchPostfix]
@@ -35,7 +37,7 @@ namespace DSX
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player.FirearmController), "method_31");
+            return AccessTools.Method(typeof(Player.FirearmController), nameof(Player.FirearmController.IEventsConsumerOnAddAmmoInChamber));
         }
 
         [PatchPostfix]
@@ -61,7 +63,7 @@ namespace DSX
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(Player.FirearmController), "method_30");
+            return AccessTools.Method(typeof(Player.FirearmController), nameof(Player.FirearmController.IEventsConsumerOnDelAmmoChamber));
         }
 
         [PatchPostfix]

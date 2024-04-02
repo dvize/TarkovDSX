@@ -155,7 +155,7 @@ namespace DSX
 
         }
 
-        private void Player_HandsChangedEvent(GInterface109 obj)
+        private void Player_HandsChangedEvent(IHandsController controller)
         {
             //Logger.LogDebug("TarkovDSX: Hands Changed");
 
@@ -164,7 +164,7 @@ namespace DSX
             {
                 bool isBallisticWeapon;
 
-                if (obj.Item is KnifeClass)
+                if (controller.Item is KnifeClass)
                 {
                     isBallisticWeapon = false;
                 }
@@ -176,7 +176,7 @@ namespace DSX
 
                 if (isBallisticWeapon)
                 {
-                    Weapon weapon = obj.Item as Weapon;
+                    Weapon weapon = controller.Item as Weapon;
                     Logger.LogDebug("Weapon.firerate is: " + weapon.FireRate);
                     Logger.LogDebug("TarkovDSX: Weapon FireMode is " + weapon.SelectedFireMode.ToString().ToLower());
 
@@ -211,7 +211,7 @@ namespace DSX
 
                 else if (!isBallisticWeapon)
                 {
-                    KnifeClass weapon = obj.Item as KnifeClass;
+                    KnifeClass weapon = controller.Item as KnifeClass;
                     //Logger.LogDebug("TarkovDSX: Melee Weapon in hands: " + weapon.LocalizedName());
                     if (weapon.Weight <= 0.4)
                     {
@@ -278,49 +278,32 @@ namespace DSX
 
         internal static void checkEmptyChamber(Weapon weapon)
         {
-            //if weapon with magazine
-            if (weapon.GetMagazineSlot() != null)
+
+            if (weapon.GetMagazineSlot() != null && !(weapon.ChamberAmmoCount == 0 && weapon.GetCurrentMagazineCount() == 0))
             {
-                //if weapon with magazine and no ammo in chamber
-                if (weapon.ChamberAmmoCount == 0 && weapon.GetCurrentMagazineCount() == 0)
-                {
-                    Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Empty Chamber Trigger Setting");
-                    var side = readConfigTriggerSide(weapon);
-
-                    if (side == Trigger.Left)
-                    {
-                        triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
-                        leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
-                    }
-                    else
-                    {
-                        triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
-                        rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
-                    }
-
-                    return;
-                }
-            }
-            //if weapon doesn't have magazine, how much is loaded still
-            else if (weapon.ChamberAmmoCount == 0)
-            {
-                Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Empty Chamber Trigger Setting");
-                var side = readConfigTriggerSide(weapon);
-
-                if (side == Trigger.Left)
-                {
-
-                    triggerThresholdLeft = Instruction.TriggerThreshold(Trigger.Left, 50);
-                    leftTriggerUpdate = Instruction.VerySoft(Trigger.Left);
-                }
-                else
-                {
-
-                    triggerThresholdRight = Instruction.TriggerThreshold(Trigger.Right, 50);
-                    rightTriggerUpdate = Instruction.VerySoft(Trigger.Right);
-                }
-
                 return;
+            }
+
+            // Early return if weapon doesn't have a magazine slot but the chamber isn't empty
+            if (weapon.GetMagazineSlot() == null && weapon.ChamberAmmoCount != 0)
+            {
+                return;
+            }
+
+            Logger.LogDebug("TarkovDSX: FirearmController OnAddAmmoInChamber: Empty Chamber Trigger Setting");
+            var side = readConfigTriggerSide(weapon);
+            var triggerUpdateInstruction = Instruction.VerySoft(side);
+            var triggerThresholdInstruction = Instruction.TriggerThreshold(side, 50);
+
+            if (side == Trigger.Left)
+            {
+                triggerThresholdLeft = triggerThresholdInstruction;
+                leftTriggerUpdate = triggerUpdateInstruction;
+            }
+            else
+            {
+                triggerThresholdRight = triggerThresholdInstruction;
+                rightTriggerUpdate = triggerUpdateInstruction;
             }
 
         }
